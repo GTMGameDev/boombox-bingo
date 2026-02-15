@@ -18,16 +18,21 @@ function readSave(): SaveData | null {
 export default function Viewer() {
   const [save, setSave] = useState<SaveData | null>(() => readSave());
 
-  const gameLogoSrc = useMemo(() => `${import.meta.env.BASE_URL}branding/game-logo.png`, []);
+  const gameLogoSrc = useMemo(
+    () => `${import.meta.env.BASE_URL}branding/game-logo.png`,
+    []
+  );
 
   useEffect(() => {
-    // Update when host changes localStorage (same device)
+    document.title = "Boombox Bingo (Viewer)";
+  }, []);
+
+  useEffect(() => {
     const onStorage = (e: StorageEvent) => {
       if (e.key === KEY) setSave(readSave());
     };
     window.addEventListener("storage", onStorage);
 
-    // Update on same tab/device too (polling makes it feel "live")
     const t = window.setInterval(() => setSave(readSave()), 300);
 
     return () => {
@@ -46,10 +51,9 @@ export default function Viewer() {
         color: "#e8eef7",
         display: "grid",
         gridTemplateRows: "auto 1fr",
-        padding: 24
+        padding: 24,
       }}
     >
-      {/* Logo */}
       <div style={{ display: "grid", placeItems: "center" }}>
         <img
           src={gameLogoSrc}
@@ -58,12 +62,11 @@ export default function Viewer() {
             maxWidth: "min(900px, 92vw)",
             maxHeight: "22vh",
             objectFit: "contain",
-            filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.6))"
+            filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.6))",
           }}
         />
       </div>
 
-      {/* Big Ball */}
       <div style={{ display: "grid", placeItems: "center" }}>
         <div
           style={{
@@ -75,7 +78,7 @@ export default function Viewer() {
             boxShadow: "0 24px 80px rgba(0,0,0,0.65)",
             display: "grid",
             placeItems: "center",
-            userSelect: "none"
+            userSelect: "none",
           }}
         >
           <div style={{ fontSize: "min(22vh, 26vw)", fontWeight: 1000, letterSpacing: 2 }}>

@@ -11,18 +11,28 @@ import { useBingoGame } from "./game/useBingoGame";
 
 function HostScreen() {
   const game = useBingoGame();
-  const { save, modalOpen, setModalOpen, isFinished, callNextNumber, resetGame, setSaveName } =
-    game;
+  const {
+    save,
+    modalOpen,
+    setModalOpen,
+    isFinished,
+    callNextNumber,
+    resetGame,
+    setSaveName,
+  } = game;
 
   React.useEffect(() => {
     document.title = "Boombox Bingo";
   }, []);
 
+  // Vite base for assets ONLY (works on localhost and GitHub Pages)
   const base = import.meta.env.BASE_URL || "/";
   const baseNorm = base.endsWith("/") ? base : `${base}/`;
 
+  // Hash routes (fixes GitHub Pages 404)
   const viewerHref = React.useMemo(() => {
-    return new URL(`${baseNorm}viewer`, window.location.origin).toString();
+    // Full absolute URL for opening in a new tab
+    return new URL(`${baseNorm}#/viewer`, window.location.origin).toString();
   }, [baseNorm]);
 
   const openViewer = () => {
@@ -208,7 +218,8 @@ function HostScreen() {
             >
               <iframe
                 title="Viewer Preview"
-                src={viewerHref}
+                // Hash route so it NEVER 404s on Pages
+                src="#/viewer"
                 style={{ width: "100%", height: 240, border: "none", display: "block" }}
               />
             </div>
