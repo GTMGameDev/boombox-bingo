@@ -2,9 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/boombox-favicon.png" />
+    <link rel="icon" type="image/png" href="/boombox-bingo/boombox-favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Boombox Bingo</title>
+
+    <script>
+      // If we were redirected from /404.html, restore the route.
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var p = params.get("p");
+        var q = params.get("q");
+        if (p) {
+          var repo = "/boombox-bingo";
+          var target =
+            repo +
+            (p.startsWith("/") ? p : "/" + p) +
+            (q ? "?" + decodeURIComponent(q) : "") +
+            window.location.hash;
+          window.history.replaceState(null, "", target);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Boombox Bingo</title>
+    <script>
+      // GitHub Pages SPA redirect (keeps path + query)
+      // Works with Vite base "/boombox-bingo/"
+      var l = window.location;
+      var repo = "/boombox-bingo";
+      var newUrl =
+        repo +
+        "/?p=" +
+        encodeURIComponent(l.pathname.replace(repo, "")) +
+        (l.search ? "&q=" + encodeURIComponent(l.search.slice(1)) : "") +
+        l.hash;
+      l.replace(newUrl);
+    </script>
+  </head>
+  <body></body>
+</html>
