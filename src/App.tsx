@@ -18,6 +18,20 @@ function HostScreen() {
     document.title = "Boombox Bingo";
   }, []);
 
+  // ✅ Viewer URL that works on localhost AND GitHub Pages
+  // localhost: BASE_URL = "/"
+  // pages:     BASE_URL = "/boombox-bingo/"
+  const viewerHref = React.useMemo(() => {
+    const base = import.meta.env.BASE_URL || "/";
+    // ensure exactly one trailing slash
+    const baseNorm = base.endsWith("/") ? base : `${base}/`;
+    return new URL(`${baseNorm}viewer`, window.location.origin).toString();
+  }, []);
+
+  const openViewer = () => {
+    window.open(viewerHref, "_blank", "noopener,noreferrer");
+  };
+
   // Double-confirm reset
   const onReset = () => {
     const first = window.confirm("Reset game? This will wipe the save and called numbers.");
@@ -27,17 +41,10 @@ function HostScreen() {
     resetGame();
   };
 
-  const openViewer = () => {
-    // BASE_URL safe for localhost + GitHub Pages
-    const url = `${import.meta.env.BASE_URL}viewer`;
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+  const current = save.currentNumber;
 
-  const viewerSrc = `${import.meta.env.BASE_URL}viewer`;
   const gameLogoSrc = `${import.meta.env.BASE_URL}branding/game-logo.png`;
   const gtmLogoSrc = `${import.meta.env.BASE_URL}branding/gtm-logo.png`;
-
-  const current = save.currentNumber;
 
   return (
     <div
@@ -45,7 +52,7 @@ function HostScreen() {
         minHeight: "100vh",
         background: "#0b0f14",
         color: "#e8eef7",
-        padding: 18
+        padding: 18,
       }}
     >
       {/* Top Bar */}
@@ -59,7 +66,7 @@ function HostScreen() {
           borderRadius: 16,
           border: "1px solid rgba(255,255,255,0.10)",
           background: "rgba(255,255,255,0.03)",
-          marginBottom: 16
+          marginBottom: 16,
         }}
       >
         <SaveBar saveName={save.saveName} updatedAtISO={save.updatedAtISO} onRename={setSaveName} />
@@ -74,7 +81,7 @@ function HostScreen() {
               background: "transparent",
               color: "#e8eef7",
               fontWeight: 800,
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             Open Viewer Screen
@@ -90,7 +97,7 @@ function HostScreen() {
           display: "grid",
           gridTemplateColumns: "1.7fr 1fr",
           gap: 16,
-          alignItems: "start"
+          alignItems: "start",
         }}
       >
         {/* Left Main Card */}
@@ -99,7 +106,7 @@ function HostScreen() {
             borderRadius: 18,
             border: "1px solid rgba(255,255,255,0.10)",
             background: "rgba(255,255,255,0.03)",
-            padding: 16
+            padding: 16,
           }}
         >
           <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 18 }}>
@@ -124,7 +131,7 @@ function HostScreen() {
                     background: isFinished ? "rgba(59,130,246,0.15)" : "#60a5fa",
                     color: "#04101f",
                     fontWeight: 900,
-                    cursor: isFinished ? "not-allowed" : "pointer"
+                    cursor: isFinished ? "not-allowed" : "pointer",
                   }}
                 >
                   Call Next Number
@@ -141,7 +148,7 @@ function HostScreen() {
                     color: "#e8eef7",
                     fontWeight: 900,
                     cursor: !current ? "not-allowed" : "pointer",
-                    opacity: !current ? 0.6 : 1
+                    opacity: !current ? 0.6 : 1,
                   }}
                 >
                   Play Song Popup
@@ -158,7 +165,7 @@ function HostScreen() {
                     background: "transparent",
                     color: "#e8eef7",
                     fontWeight: 900,
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                 >
                   Reset game
@@ -174,7 +181,7 @@ function HostScreen() {
                     border: "1px solid rgba(34,197,94,0.35)",
                     background: "rgba(34,197,94,0.12)",
                     color: "#bbf7d0",
-                    fontWeight: 900
+                    fontWeight: 900,
                   }}
                 >
                   Finished! All 90 numbers have been called.
@@ -193,7 +200,7 @@ function HostScreen() {
                 width: "min(880px, 92%)",
                 height: "auto",
                 objectFit: "contain",
-                filter: "drop-shadow(0 18px 45px rgba(0,0,0,0.65))"
+                filter: "drop-shadow(0 18px 45px rgba(0,0,0,0.65))",
               }}
             />
           </div>
@@ -209,7 +216,7 @@ function HostScreen() {
               padding: 12,
               borderRadius: 14,
               border: "1px solid rgba(255,255,255,0.10)",
-              background: "rgba(255,255,255,0.03)"
+              background: "rgba(255,255,255,0.03)",
             }}
           >
             <div style={{ fontWeight: 900, marginBottom: 8 }}>Instructions</div>
@@ -227,7 +234,7 @@ function HostScreen() {
               padding: 12,
               borderRadius: 14,
               border: "1px solid rgba(255,255,255,0.10)",
-              background: "rgba(255,255,255,0.03)"
+              background: "rgba(255,255,255,0.03)",
             }}
           >
             <div style={{ fontWeight: 900, marginBottom: 8 }}>Viewer Preview</div>
@@ -237,17 +244,17 @@ function HostScreen() {
                 borderRadius: 14,
                 overflow: "hidden",
                 border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(0,0,0,0.25)"
+                background: "rgba(0,0,0,0.25)",
               }}
             >
               <iframe
                 title="Viewer Preview"
-                src={viewerSrc}
+                src={viewerHref}
                 style={{
                   width: "100%",
                   height: 240,
                   border: "none",
-                  display: "block"
+                  display: "block",
                 }}
               />
             </div>
@@ -264,7 +271,7 @@ function HostScreen() {
                   height: "auto",
                   objectFit: "contain",
                   opacity: 0.95,
-                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.55))"
+                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.55))",
                 }}
               />
             </div>
