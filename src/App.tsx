@@ -18,21 +18,17 @@ function HostScreen() {
     document.title = "Boombox Bingo";
   }, []);
 
-  // ✅ Viewer URL that works on localhost AND GitHub Pages
-  // localhost: BASE_URL = "/"
-  // pages:     BASE_URL = "/boombox-bingo/"
+  const base = import.meta.env.BASE_URL || "/";
+  const baseNorm = base.endsWith("/") ? base : `${base}/`;
+
   const viewerHref = React.useMemo(() => {
-    const base = import.meta.env.BASE_URL || "/";
-    // ensure exactly one trailing slash
-    const baseNorm = base.endsWith("/") ? base : `${base}/`;
     return new URL(`${baseNorm}viewer`, window.location.origin).toString();
-  }, []);
+  }, [baseNorm]);
 
   const openViewer = () => {
     window.open(viewerHref, "_blank", "noopener,noreferrer");
   };
 
-  // Double-confirm reset
   const onReset = () => {
     const first = window.confirm("Reset game? This will wipe the save and called numbers.");
     if (!first) return;
@@ -43,19 +39,11 @@ function HostScreen() {
 
   const current = save.currentNumber;
 
-  const gameLogoSrc = `${import.meta.env.BASE_URL}branding/game-logo.png`;
-  const gtmLogoSrc = `${import.meta.env.BASE_URL}branding/gtm-logo.png`;
+  const gameLogoSrc = `${baseNorm}branding/game-logo.png`;
+  const gtmLogoSrc = `${baseNorm}branding/gtm-logo.png`;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0b0f14",
-        color: "#e8eef7",
-        padding: 18,
-      }}
-    >
-      {/* Top Bar */}
+    <div style={{ minHeight: "100vh", background: "#0b0f14", color: "#e8eef7", padding: 18 }}>
       <div
         style={{
           display: "flex",
@@ -91,16 +79,7 @@ function HostScreen() {
         </div>
       </div>
 
-      {/* Main Layout */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.7fr 1fr",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
-        {/* Left Main Card */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.7fr 1fr", gap: 16 }}>
         <div
           style={{
             borderRadius: 18,
@@ -171,26 +150,9 @@ function HostScreen() {
                   Reset game
                 </button>
               </div>
-
-              {isFinished && (
-                <div
-                  style={{
-                    marginTop: 12,
-                    padding: 10,
-                    borderRadius: 12,
-                    border: "1px solid rgba(34,197,94,0.35)",
-                    background: "rgba(34,197,94,0.12)",
-                    color: "#bbf7d0",
-                    fontWeight: 900,
-                  }}
-                >
-                  Finished! All 90 numbers have been called.
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Big game logo (no container look) */}
           <div style={{ marginTop: 22, display: "grid", placeItems: "center" }}>
             <img
               src={gameLogoSrc}
@@ -206,11 +168,9 @@ function HostScreen() {
           </div>
         </div>
 
-        {/* Right Column */}
         <div style={{ display: "grid", gap: 16 }}>
           <HistoryPanel calledNumbers={save.calledNumbers} />
 
-          {/* Instructions */}
           <div
             style={{
               padding: 12,
@@ -228,7 +188,6 @@ function HostScreen() {
             </ul>
           </div>
 
-          {/* Viewer Preview + GTM logo */}
           <div
             style={{
               padding: 12,
@@ -250,36 +209,22 @@ function HostScreen() {
               <iframe
                 title="Viewer Preview"
                 src={viewerHref}
-                style={{
-                  width: "100%",
-                  height: 240,
-                  border: "none",
-                  display: "block",
-                }}
+                style={{ width: "100%", height: 240, border: "none", display: "block" }}
               />
             </div>
 
-            {/* GTM logo directly under PIP, small */}
             <div style={{ marginTop: 10, display: "grid", placeItems: "center" }}>
               <img
                 src={gtmLogoSrc}
                 alt="GTM Game Dev"
                 draggable={false}
-                style={{
-                  maxWidth: 220,
-                  width: "70%",
-                  height: "auto",
-                  objectFit: "contain",
-                  opacity: 0.95,
-                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.55))",
-                }}
+                style={{ maxWidth: 220, width: "70%", height: "auto", objectFit: "contain" }}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Song Modal */}
       <PlaySongModal open={modalOpen} number={current} onClose={() => setModalOpen(false)} />
     </div>
   );
