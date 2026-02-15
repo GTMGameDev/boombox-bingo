@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function SaveBar({
   saveName,
@@ -6,11 +6,22 @@ export default function SaveBar({
   onRename
 }: {
   saveName: string;
-  updatedAtISO: string;
+  updatedAtISO?: string;
   onRename: (name: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(saveName);
+
+  useEffect(() => {
+    setDraft(saveName);
+  }, [saveName]);
+
+  const dateText = (() => {
+    if (!updatedAtISO) return "—";
+    const d = new Date(updatedAtISO);
+    if (Number.isNaN(d.getTime())) return "—";
+    return d.toLocaleString();
+  })();
 
   return (
     <div
@@ -22,7 +33,8 @@ export default function SaveBar({
         padding: 12,
         borderRadius: 14,
         border: "1px solid rgba(255,255,255,0.10)",
-        background: "rgba(255,255,255,0.03)"
+        background: "rgba(255,255,255,0.03)",
+        width: "100%"
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -45,9 +57,8 @@ export default function SaveBar({
             />
           )}
         </div>
-        <div style={{ fontSize: 12, opacity: 0.75 }}>
-          Autosaved: {new Date(updatedAtISO).toLocaleString()}
-        </div>
+
+        <div style={{ fontSize: 12, opacity: 0.75 }}>Autosaved: {dateText}</div>
       </div>
 
       {!editing ? (
@@ -63,7 +74,8 @@ export default function SaveBar({
             background: "transparent",
             color: "#fff",
             cursor: "pointer",
-            fontWeight: 700
+            fontWeight: 700,
+            whiteSpace: "nowrap"
           }}
         >
           Rename

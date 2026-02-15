@@ -1,9 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Viewer from "./pages/Viewer";
-import "./App.css";
 
-// --- your existing imports (keep these if you already have them) ---
 import SaveBar from "./components/SaveBar";
 import HistoryPanel from "./components/HistoryPanel";
 import PlaySongModal from "./components/PlaySongModal";
@@ -11,98 +9,211 @@ import UploadSongClipsButton from "./components/UploadSongClipsButton";
 import NumberBall from "./components/NumberBall";
 import { useBingoGame } from "./game/useBingoGame";
 
-// If you have extra CSS file names (styles.css etc) keep your existing ones too.
-// Example: import "./styles.css";
-
 function HostScreen() {
-  // Keep your existing game hook/state logic here
   const game = useBingoGame();
+  const { save, modalOpen, setModalOpen, isFinished, callNextNumber, resetGame, setSaveName } =
+    game;
 
   React.useEffect(() => {
     document.title = "Boombox Bingo";
   }, []);
 
-  // ---- If your current App.tsx already has UI layout, paste it inside here ----
-  // The code below is a safe host layout that matches your screenshots:
-  const {
-    state,
-    callNextNumber,
-    openPlayModal,
-    closePlayModal,
-    isPlayModalOpen,
-    resetGame,
-    renameSave,
-  } = game as any; // (keeps this compiling even if your hook returns slightly different names)
+  // Double-confirm reset
+  const onReset = () => {
+    const first = window.confirm("Reset game? This will wipe the save and called numbers.");
+    if (!first) return;
+    const second = window.confirm("ARE YOU SURE? This cannot be undone.");
+    if (!second) return;
+    resetGame();
+  };
+
+  const openViewer = () => {
+    // BASE_URL safe for localhost + GitHub Pages
+    const url = `${import.meta.env.BASE_URL}viewer`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const viewerSrc = `${import.meta.env.BASE_URL}viewer`;
+  const gameLogoSrc = `${import.meta.env.BASE_URL}branding/game-logo.png`;
+  const gtmLogoSrc = `${import.meta.env.BASE_URL}branding/gtm-logo.png`;
+
+  const current = save.currentNumber;
 
   return (
-    <div className="app-shell">
-      {/* Top bar */}
-      <div className="topbar">
-        <SaveBar
-          saveName={state?.saveName}
-          lastSavedAt={state?.lastSavedAt}
-          onRename={renameSave}
-        />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0b0f14",
+        color: "#e8eef7",
+        padding: 18
+      }}
+    >
+      {/* Top Bar */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          padding: 14,
+          borderRadius: 16,
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.03)",
+          marginBottom: 16
+        }}
+      >
+        <SaveBar saveName={save.saveName} updatedAtISO={save.updatedAtISO} onRename={setSaveName} />
 
-        <div className="topbar-actions">
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button
-            className="btn btn-secondary"
-            onClick={() => window.open("viewer", "_blank", "noopener,noreferrer")}
+            onClick={openViewer}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.16)",
+              background: "transparent",
+              color: "#e8eef7",
+              fontWeight: 800,
+              cursor: "pointer"
+            }}
           >
             Open Viewer Screen
           </button>
 
           <UploadSongClipsButton />
-
         </div>
       </div>
 
-      <div className="layout">
-        {/* Left / Main */}
-        <div className="main-card">
-          <div className="main-top">
-            <div className="ball-wrap">
-              <NumberBall value={state?.currentNumber ?? null} />
+      {/* Main Layout */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1.7fr 1fr",
+          gap: 16,
+          alignItems: "start"
+        }}
+      >
+        {/* Left Main Card */}
+        <div
+          style={{
+            borderRadius: 18,
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.03)",
+            padding: 16
+          }}
+        >
+          <div style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: 18 }}>
+            <div style={{ display: "grid", placeItems: "center" }}>
+              <NumberBall value={current ?? null} />
             </div>
 
-            <div className="controls">
-              <div className="label">Current number</div>
-              <div className="current-number">{state?.currentNumber ?? "—"}</div>
+            <div>
+              <div style={{ fontSize: 13, opacity: 0.75, marginBottom: 6 }}>Current number</div>
+              <div style={{ fontSize: 44, fontWeight: 1000, marginBottom: 12 }}>
+                {current ?? "—"}
+              </div>
 
-              <div className="btn-row">
-                <button className="btn btn-primary" onClick={callNextNumber}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button
+                  onClick={callNextNumber}
+                  disabled={isFinished}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    border: "1px solid rgba(59,130,246,0.45)",
+                    background: isFinished ? "rgba(59,130,246,0.15)" : "#60a5fa",
+                    color: "#04101f",
+                    fontWeight: 900,
+                    cursor: isFinished ? "not-allowed" : "pointer"
+                  }}
+                >
                   Call Next Number
                 </button>
 
-                <button className="btn btn-secondary" onClick={openPlayModal}>
+                <button
+                  onClick={() => setModalOpen(true)}
+                  disabled={!current}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    background: "transparent",
+                    color: "#e8eef7",
+                    fontWeight: 900,
+                    cursor: !current ? "not-allowed" : "pointer",
+                    opacity: !current ? 0.6 : 1
+                  }}
+                >
                   Play Song Popup
                 </button>
               </div>
 
-              <button className="btn btn-secondary" onClick={resetGame}>
-                Reset game
-              </button>
+              <div style={{ marginTop: 10 }}>
+                <button
+                  onClick={onReset}
+                  style={{
+                    padding: "10px 14px",
+                    borderRadius: 12,
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    background: "transparent",
+                    color: "#e8eef7",
+                    fontWeight: 900,
+                    cursor: "pointer"
+                  }}
+                >
+                  Reset game
+                </button>
+              </div>
+
+              {isFinished && (
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 10,
+                    borderRadius: 12,
+                    border: "1px solid rgba(34,197,94,0.35)",
+                    background: "rgba(34,197,94,0.12)",
+                    color: "#bbf7d0",
+                    fontWeight: 900
+                  }}
+                >
+                  Finished! All 90 numbers have been called.
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Big logo area (your boombox bingo logo image) */}
-          <div className="brand-area">
+          {/* Big game logo (no container look) */}
+          <div style={{ marginTop: 22, display: "grid", placeItems: "center" }}>
             <img
-              src={`${import.meta.env.BASE_URL}branding/game-logo.png`}
+              src={gameLogoSrc}
               alt="Boombox Bingo"
-              className="game-logo"
               draggable={false}
+              style={{
+                width: "min(880px, 92%)",
+                height: "auto",
+                objectFit: "contain",
+                filter: "drop-shadow(0 18px 45px rgba(0,0,0,0.65))"
+              }}
             />
           </div>
         </div>
 
-        {/* Right column */}
-        <div className="side">
-          <HistoryPanel calledNumbers={state?.calledNumbers ?? []} />
+        {/* Right Column */}
+        <div style={{ display: "grid", gap: 16 }}>
+          <HistoryPanel calledNumbers={save.calledNumbers} />
 
-          <div className="panel">
-            <div className="panel-title">Instructions</div>
-            <ul className="panel-list">
+          {/* Instructions */}
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.03)"
+            }}
+          >
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>Instructions</div>
+            <ul style={{ margin: 0, paddingLeft: 18, lineHeight: 1.6, opacity: 0.9 }}>
               <li>Upload clips named 1.mp3 to 90.mp3</li>
               <li>Click Call Next Number</li>
               <li>Click Play Song</li>
@@ -110,35 +221,59 @@ function HostScreen() {
             </ul>
           </div>
 
-          <div className="panel">
-            <div className="panel-title">Viewer Preview</div>
+          {/* Viewer Preview + GTM logo */}
+          <div
+            style={{
+              padding: 12,
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.10)",
+              background: "rgba(255,255,255,0.03)"
+            }}
+          >
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>Viewer Preview</div>
 
-            <div className="viewer-pip">
+            <div
+              style={{
+                borderRadius: 14,
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.25)"
+              }}
+            >
               <iframe
                 title="Viewer Preview"
-                src="viewer"
-                className="viewer-iframe"
+                src={viewerSrc}
+                style={{
+                  width: "100%",
+                  height: 240,
+                  border: "none",
+                  display: "block"
+                }}
               />
             </div>
 
-            {/* small GTM logo directly under PIP */}
-            <div className="gtm-wrap">
+            {/* GTM logo directly under PIP, small */}
+            <div style={{ marginTop: 10, display: "grid", placeItems: "center" }}>
               <img
-                src={`${import.meta.env.BASE_URL}branding/gtm-logo.png`}
+                src={gtmLogoSrc}
                 alt="GTM Game Dev"
-                className="gtm-logo"
                 draggable={false}
+                style={{
+                  maxWidth: 220,
+                  width: "70%",
+                  height: "auto",
+                  objectFit: "contain",
+                  opacity: 0.95,
+                  filter: "drop-shadow(0 10px 20px rgba(0,0,0,0.55))"
+                }}
               />
             </div>
           </div>
         </div>
       </div>
 
-      <PlaySongModal
-        isOpen={isPlayModalOpen}
-        onClose={closePlayModal}
-        currentNumber={state?.currentNumber ?? null}
-      />
+      {/* Song Modal */}
+      <PlaySongModal open={modalOpen} number={current} onClose={() => setModalOpen(false)} />
     </div>
   );
 }
